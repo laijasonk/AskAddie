@@ -2,10 +2,10 @@
 
 import os
 import glob
-from src import ChatBot
+from src import Agent
 
 # Initiate a chatbot named Addie
-addie = ChatBot.ChatBot()
+addie = Agent.ChatBot()
 
 # Prepare chatbot with context
 context = ""
@@ -16,7 +16,7 @@ context += "The guidances and policies of Hybrid Intelligence is described in a 
 
 # Add quality manual excerpts if present
 context += "The following are excerpts from the quality manual of a company called Hybrid Intelligence. "
-for context_excert in glob.glob(os.path.abspath("./data/context/*.txt")):
+for context_excerpt in glob.glob(os.path.abspath("./data/context/*.txt")):
     context += "<exerpt> "
     with open(context_excerpt, "r") as f:
         context += f.readlines()[0].strip()
@@ -57,5 +57,5 @@ tokenizer_name = "bigscience/bloom-3b"
 addie.set_model_names(model_name, tokenizer_name)
 addie.load_models()
 
-# Run the chatbot
+# Run the conversational AI agent
 addie.run()
