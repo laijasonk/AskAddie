@@ -1,0 +1,7 @@
+# Environment (Optional)
+jupyterlab==3.6.3
+black==23.3.0
+
+# Modeling
+torch==2.0.0
+transformers==4.27.4
