@@ -73,7 +73,7 @@ class ChatBot:
         self.model = self._pretrained_model(self.model_name)
 
         print(f"Loading tokenizer ({self.tokenizer_name})")
-        self.tokenizer = self._pretrained_tokenizer(self.tokenizer)
+        self.tokenizer = self._pretrained_tokenizer(self.tokenizer_name)
 
         return None
 
@@ -137,9 +137,9 @@ class ChatBot:
         # Run the chatbot
         while True:
             user_input = input("Input: ")
-            formatted_input = f"<line> Employee: {user_input.strip()}"
+            formatted_input = f"<line> Employee: {user_input.strip()}\n"
             prompt += formatted_input
-            prompt += " <line> Addie:"
+            prompt += "<line> Addie:"
             count = len(prompt.split("<line>"))
 
             prompt = self._ai_response(prompt)
@@ -172,7 +172,6 @@ class ChatBot:
             model (obj): Pre-trained model
         """
 
-        #return BloomForCausalLM.from_pretrained(model_name)
         return AutoModelForCausalLM.from_pretrained(model_name)
 
     def _pretrained_tokenizer(self, tokenizer_name):
@@ -184,7 +183,6 @@ class ChatBot:
             tokenizer (obj): Pre-trained tokenizer
         """
 
-        #return BloomTokenizerFast.from_pretrained(tokenizer_name)
         return AutoTokenizer.from_pretrained(tokenizer_name)
 
     def _ai_response(self, prompt):
@@ -201,11 +199,15 @@ class ChatBot:
 
         # Tokenize input prompt with Hugging Face tools
         inputs = self.tokenizer(prompt, return_tensors="pt")
+        attention_mask = inputs.get("attention_mask", None)
+        pad_token_id = self.tokenizer.pad_token_id
 
         # Generate text on top of prompt
         updated_prompt = self.tokenizer.decode(
             self.model.generate(
                 inputs["input_ids"],
+                attention_mask=attention_mask,
+                pad_token_id=pad_token_id,
                 # num_beams=2,
                 # no_repeat_ngram_size=2,
                 # do_sample=True,
@@ -230,7 +232,7 @@ class ChatBot:
         """
 
         split_prompt = prompt.split("<line>")
-        updated_prompt = " <line> ".join(split_prompt[0:count])
+        updated_prompt = "\n<line> ".join(split_prompt[0:count])
         updated_prompt = updated_prompt.replace("  ", " ")
 
         response = split_prompt[count - 1]
@@ -240,55 +242,105 @@ class ChatBot:
 
 
 class BloomBot(ChatBot):
-    # def _pretrained_model(self, model_name):
-    #     return BloomForCausalLM.from_pretrained(model_name)
-
-    # def _pretrained_tokenizer(self, tokenizer_name):
-    #     return BloomTokenizerFast.from_pretrained(tokenizer_name)
-
     def _use_default_prompt(self):
         # Prepare chatbot with context
-        context = ""
-        context += (
-            "Hybrid Intelligence is a group that is part of Capgemini Engineering. "
-        )
-        context += "Hybrid Intelligence used to be a company called Tessella. "
-        context += "Hybrid Intelligence is a group that fuses deep human expertise, advanced technology, and intelligent machine capabilities to deliver solutions to clients. "
+        context = "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering. "
+        context += "Hybrid Intelligence used to be a UK-based company called Tessella. "
+        context += "The staff in Hybrid Intelligence fuses deep human expertise, advanced technology, and intelligent machine capabilities to deliver solutions to clients. "
         context += "The guidances and policies of Hybrid Intelligence is described in a document called the quality manual. "
+        context += "\n"
 
         # Add quality manual excerpts if present
-        context += "The following are excerpts from the quality manual of a company called Hybrid Intelligence. "
+        context += "The following are excerpts from Hybrid Intelligence's quality manual.\n"
         for context_excerpt in glob.glob(os.path.abspath("./data/context/*.txt")):
             context += "<exerpt> "
             with open(context_excerpt, "r") as f:
                 context += f.readlines()[0].strip()
-            context += "</exerpt> "
+            context += "\n"
 
         # Preparing identity prompt
-        identity = ""
-        identity += "The following is a conversation between a company expert from Hybrid Intelligence named Addie and an Employee of Hybrid Intelligence. "
+        identity = "An AI assistent representing Hybrid Intelligence named Addie and an Employee of Hybrid Intelligence are having a conversation. "
         identity += "Addie is an AI assistent that answers questions about Hybrid Intelligence's employee policies and guidances, which are described in the staff manual. "
         identity += "Addie is an AI assistent that answers questions about the best practices for Hybrid Intelligence employees, which are described in the quality manual. "
+        identity += "\n"
 
         # Preparing intent prompt
-        intent = ""
-        intent += "Addie helps the Employee by answering questions about the company policies, guidances, and best practices that are extracted from the quality manual and staff manual. "
+        intent = "Addie helps the Employee by answering questions about the company policies, guidances, and best practices that are extracted from the quality manual and staff manual. "
         intent += "When Addie is asked about something unrelated to the company policies, guidances, or best practices, Addie politely apoligizes and responds that she is not designed to answer that question. "
         intent += "When Addie is asked about specifics about the contents of the quality manual or staff manual, Addie politely apologizes and responds that she does not know the answer yet, because she hasn't read the quality manual or staff manual. "
+        intent += "\n"
 
         # Preparing behavior prompt
-        behavior = ""
-        behavior += "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee. "
-        behavior += "The following is a conversation between Addie and an Hybrid Intelligence Employee. "
+        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee.\n"
 
         # Preparing example prompt
-        example = ""
-        example += "<line> Employee: Hello. How are you? "
-        example += "<line> Addie: Good, thank you for asking! "
-        example += "<line> Employee: Can you tell me about yourself? "
-        example += "<line> Addie: Absolutely! I am Addie, an AI assistent here to answer your questions about the company policies, guidances, and best practices. "
-        example += "<line> Employee: Thank you. Let's start this conversation over. "
-        example += "<line> Addie: Okay, we can restart this conversation now. "
+        example = "The following is a conversation between Addie and an Hybrid Intelligence Employee.\n"
+        example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
+        example += "<line> Employee: Hello. How are you?\n"
+        example += "<line> Addie: Good, thank you for asking!\n"
+        example += "<line> Employee: Can you tell me about yourself?\n"
+        example += "<line> Addie: Absolutely! I am Addie, an AI assistent here to answer your questions about Hybrid Intelligence's company policies, guidances, and best practices.\n"
+        example += "<line> Employee: Thank you. Let's start this conversation over.\n"
+        example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
+
+        # Store defaults
+        self.context = context
+        self.identity = identity
+        self.intent = intent
+        self.behavior = behavior
+        self.example = example
+
+        # Set defaults
+        self.set_scenario(
+            self.context, self.identity, self.intent, self.behavior, self.example
+        )
+
+        return None
+
+
+class DollyBot(ChatBot):
+    def _use_default_prompt(self):
+        # Prepare chatbot with context
+        context = "Complete the next line in the conversation.\n\n"
+        context += "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering. "
+        context += "Hybrid Intelligence used to be a UK-based company called Tessella. "
+        context += "The staff in Hybrid Intelligence fuses deep human expertise, advanced technology, and intelligent machine capabilities to deliver solutions to clients. "
+        context += "The guidances and policies of Hybrid Intelligence is described in a document called the quality manual. "
+        context += "\n"
+
+        # Add quality manual excerpts if present
+        context += "The following are excerpts from Hybrid Intelligence's quality manual.\n"
+        for context_excerpt in glob.glob(os.path.abspath("./data/context/*.txt")):
+            context += "<exerpt> "
+            with open(context_excerpt, "r") as f:
+                context += f.readlines()[0].strip()
+            context += "\n"
+
+        # Preparing identity prompt
+        identity = "An AI assistent representing Hybrid Intelligence named Addie and an Employee of Hybrid Intelligence are having a conversation. "
+        identity += "Addie is an AI assistent that answers questions about Hybrid Intelligence's employee policies and guidances, which are described in the staff manual. "
+        identity += "Addie is an AI assistent that answers questions about the best practices for Hybrid Intelligence employees, which are described in the quality manual. "
+        identity += "\n"
+
+        # Preparing intent prompt
+        intent = "Addie helps the Employee by answering questions about the company policies, guidances, and best practices that are extracted from the quality manual and staff manual. "
+        intent += "When Addie is asked about something unrelated to the company policies, guidances, or best practices, Addie politely apoligizes and responds that she is not designed to answer that question. "
+        intent += "When Addie is asked about specifics about the contents of the quality manual or staff manual, Addie politely apologizes and responds that she does not know the answer yet, because she hasn't read the quality manual or staff manual. "
+        intent += "\n"
+
+        # Preparing behavior prompt
+        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee.\n"
+
+        # Preparing example prompt
+        example = "The following is a conversation between Addie and an Hybrid Intelligence Employee.\n"
+        example += "Complete the next line in the conversation below.\n"
+        example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
+        example += "<line> Employee: Hello. How are you?\n"
+        example += "<line> Addie: Good, thank you for asking!\n"
+        example += "<line> Employee: Can you tell me about yourself?\n"
+        example += "<line> Addie: Absolutely! I am Addie, an AI assistent here to answer your questions about Hybrid Intelligence's company policies, guidances, and best practices.\n"
+        example += "<line> Employee: Thank you. Let's start this conversation over.\n"
+        example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
 
         # Store defaults
         self.context = context
