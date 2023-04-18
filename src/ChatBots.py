@@ -1,4 +1,5 @@
 import os
+import glob
 
 # Set before importing libraries to change the cache directory
 os.environ["TRANSFORMERS_CACHE"] = os.path.abspath("./data/models/")
@@ -8,9 +9,6 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
-
-# from transformers import BloomForCausalLM
-# from transformers import BloomTokenizerFast
 
 
 class ChatBot:
@@ -43,11 +41,12 @@ class ChatBot:
         self.tokenizer_name = "bigscience/bloom-3b"
         self.model = None
         self.tokenizer = None
-        self.context = "Hybrid Intelligence is part of Capgemini Engineering. "
-        self.identity = "The following is a conversation between Addie and a human. "
-        self.intent = "Addie is helping the human navigate the quality manual. "
-        self.behavior = "Addie is conversational, helpful, and friendly. "
-        self.example = "<line> Human: How are you? <line> Addie: Good, thank you! "
+        self.context = "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering.\n"
+        self.identity = "The following is a conversation between Addie and a Hybrid Intelligence employee.\n"
+        self.intent = "Addie is helping the Employee navigate the quality manual.\n"
+        self.behavior = "Addie is conversational, helpful, and friendly.\n"
+        self.example = "<line> Employee: How are you?\n<line> Addie: Good, thank you!\n"
+        self.key = "<line> Addie:"
 
         return None
 
@@ -146,6 +145,7 @@ class ChatBot:
             prompt += self.key
             count = len(prompt.split("<line>"))
 
+            # print(prompt) # debug
             prompt = self._ai_response(prompt)
             # print(prompt) # debug
             [prompt, last_line] = self._parse_prompt(prompt, count)
@@ -216,7 +216,7 @@ class ChatBot:
                 # no_repeat_ngram_size=2,
                 # do_sample=True,
                 # top_k=50,
-                # top_p=0.9,
+                # top_p=0.92,
                 max_new_tokens=200,
                 early_stopping=True,
             )[0]
@@ -236,8 +236,9 @@ class ChatBot:
         """
 
         split_prompt = prompt.split("<line>")
-        updated_prompt = "\n<line> ".join(split_prompt[0:count])
+        updated_prompt = "<line>".join(split_prompt[0:count])
         updated_prompt = updated_prompt.replace("  ", " ")
+        updated_prompt = updated_prompt.strip() + "\n"
 
         response = split_prompt[count - 1]
         response = response.strip()
@@ -246,7 +247,7 @@ class ChatBot:
 
 
 class BloomBot(ChatBot):
-    def _use_default_prompt(self):
+    def use_default_prompt(self):
         # Prepare chatbot with context
         context = "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering. "
         context += "Hybrid Intelligence used to be a UK-based company called Tessella. "
@@ -299,7 +300,7 @@ class BloomBot(ChatBot):
 
 
 class DollyBot(ChatBot):
-    def _use_default_prompt(self):
+    def use_default_prompt(self):
         # Prepare chatbot with context
         context = "Complete the next line in the conversation.\n\n"
         context += "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering. "
