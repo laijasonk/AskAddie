@@ -8,6 +8,7 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
+
 # from transformers import BloomForCausalLM
 # from transformers import BloomTokenizerFast
 
@@ -25,6 +26,7 @@ class ChatBot:
         intent (str): Prompt engineer for chatbot's intent
         behavior (str): Prompt engineer for chatbot's behavior
         example (str): Example conversation format
+        key (str): Example new response line format
     """
 
     def __init__(self):
@@ -92,7 +94,7 @@ class ChatBot:
 
         return None
 
-    def set_scenario(self, context, identity, intent, behavior, example):
+    def set_scenario(self, context, identity, intent, behavior, example, key):
         """Set the scenario via prompt engineering.
 
         Args:
@@ -101,6 +103,7 @@ class ChatBot:
             intent (str): Prompt engineer for Addie's intent
             behavior (str): Prompt engineer for Addie's behavior
             example (str): Example conversation format
+            key (str): Example new response line format
         Returns:
             None
         """
@@ -110,6 +113,7 @@ class ChatBot:
         self.intent = intent
         self.behavior = behavior
         self.example = example
+        self.key = key
 
         return None
 
@@ -139,7 +143,7 @@ class ChatBot:
             user_input = input("Input: ")
             formatted_input = f"<line> Employee: {user_input.strip()}\n"
             prompt += formatted_input
-            prompt += "<line> Addie:"
+            prompt += self.key
             count = len(prompt.split("<line>"))
 
             prompt = self._ai_response(prompt)
@@ -251,7 +255,9 @@ class BloomBot(ChatBot):
         context += "\n"
 
         # Add quality manual excerpts if present
-        context += "The following are excerpts from Hybrid Intelligence's quality manual.\n"
+        context += (
+            "The following are excerpts from Hybrid Intelligence's quality manual.\n"
+        )
         for context_excerpt in glob.glob(os.path.abspath("./data/context/*.txt")):
             context += "<exerpt> "
             with open(context_excerpt, "r") as f:
@@ -283,17 +289,11 @@ class BloomBot(ChatBot):
         example += "<line> Employee: Thank you. Let's start this conversation over.\n"
         example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
 
-        # Store defaults
-        self.context = context
-        self.identity = identity
-        self.intent = intent
-        self.behavior = behavior
-        self.example = example
+        # Preparing start key prompt
+        key = "<line> Addie:"
 
         # Set defaults
-        self.set_scenario(
-            self.context, self.identity, self.intent, self.behavior, self.example
-        )
+        self.set_scenario(context, identity, intent, behavior, example, key)
 
         return None
 
@@ -309,7 +309,9 @@ class DollyBot(ChatBot):
         context += "\n"
 
         # Add quality manual excerpts if present
-        context += "The following are excerpts from Hybrid Intelligence's quality manual.\n"
+        context += (
+            "The following are excerpts from Hybrid Intelligence's quality manual.\n"
+        )
         for context_excerpt in glob.glob(os.path.abspath("./data/context/*.txt")):
             context += "<exerpt> "
             with open(context_excerpt, "r") as f:
@@ -342,16 +344,10 @@ class DollyBot(ChatBot):
         example += "<line> Employee: Thank you. Let's start this conversation over.\n"
         example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
 
-        # Store defaults
-        self.context = context
-        self.identity = identity
-        self.intent = intent
-        self.behavior = behavior
-        self.example = example
+        # Preparing start key prompt
+        key = ""
 
         # Set defaults
-        self.set_scenario(
-            self.context, self.identity, self.intent, self.behavior, self.example
-        )
+        self.set_scenario(context, identity, intent, behavior, example, key)
 
         return None
