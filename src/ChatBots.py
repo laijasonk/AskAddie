@@ -273,12 +273,11 @@ class BloomBot(ChatBot):
 
         # Preparing intent prompt
         intent = "Addie helps the Employee by answering questions about the company policies, guidances, and best practices that are extracted from the quality manual and staff manual. "
-        intent += "When Addie is asked about something unrelated to the company policies, guidances, or best practices, Addie politely apoligizes and responds that she is not designed to answer that question. "
-        intent += "When Addie is asked about specifics about the contents of the quality manual or staff manual, Addie politely apologizes and responds that she does not know the answer yet, because she hasn't read the quality manual or staff manual. "
         intent += "\n"
 
         # Preparing behavior prompt
-        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee.\n"
+        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee."
+        behavior += "\n"
 
         # Preparing example prompt
         example = "The following is a conversation between Addie and an Hybrid Intelligence Employee.\n"
@@ -302,7 +301,7 @@ class BloomBot(ChatBot):
 class DollyBot(ChatBot):
     def use_default_prompt(self):
         # Prepare chatbot with context
-        context = "Complete the next line in the conversation.\n\n"
+        context = "Complete the next line in the conversation.\n"
         context += "Hybrid Intelligence is a practice unit inside a company called Capgemini Engineering. "
         context += "Hybrid Intelligence used to be a UK-based company called Tessella. "
         context += "The staff in Hybrid Intelligence fuses deep human expertise, advanced technology, and intelligent machine capabilities to deliver solutions to clients. "
@@ -327,12 +326,11 @@ class DollyBot(ChatBot):
 
         # Preparing intent prompt
         intent = "Addie helps the Employee by answering questions about the company policies, guidances, and best practices that are extracted from the quality manual and staff manual. "
-        intent += "When Addie is asked about something unrelated to the company policies, guidances, or best practices, Addie politely apoligizes and responds that she is not designed to answer that question. "
-        intent += "When Addie is asked about specifics about the contents of the quality manual or staff manual, Addie politely apologizes and responds that she does not know the answer yet, because she hasn't read the quality manual or staff manual. "
         intent += "\n"
 
         # Preparing behavior prompt
-        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee.\n"
+        behavior = "Addie is conservational, helpful, polite, and humanly when responding to the questions from the Employee. "
+        behavior += "\n"
 
         # Preparing example prompt
         example = "The following is a conversation between Addie and an Hybrid Intelligence Employee.\n"
@@ -346,7 +344,7 @@ class DollyBot(ChatBot):
         example += "<line> Addie: Hello, I am an AI assistent named Addie. How can I help you?\n"
 
         # Preparing start key prompt
-        key = ""
+        key = "<line> Addie:"
 
         # Set defaults
         self.set_scenario(context, identity, intent, behavior, example, key)
